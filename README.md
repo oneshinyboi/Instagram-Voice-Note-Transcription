@@ -5,7 +5,7 @@ a python script for linux that automatically transcribes any voice note, in an i
 
 If the "/donttldr" message is sent, then the next voice message will be ignored.  <br />
 
-<br />
+<br /><br /><br /><br /><br /><br />
   
 # Dependencies
 The following python modules: `pip install selenium speechRecognition`
