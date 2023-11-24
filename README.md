@@ -10,7 +10,7 @@ If the "/donttldr" message is sent, then the next voice message will be ignored.
 # Dependencies
 The following python modules: `pip install selenium speechRecognition`.
 
-Google chrome and the chrome webdriver, which should be located at `/usr/bin/chromedriver`.
+Google chrome and the chrome webdriver, which should be `/usr/bin/chromedriver`.
 
 pipewire audio system (linux only), specifically access to the command `pw-record`.
 
