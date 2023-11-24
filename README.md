@@ -8,11 +8,11 @@ If the "/donttldr" message is sent, then the next voice message will be ignored.
 <br /><br /><br /><br /><br /><br />
   
 # Dependencies
-The following python modules: `pip install selenium speechRecognition`
+The following python modules: `pip install selenium speechRecognition`.
 
-Google chrome and the chrome webdriver, which should be located at `/usr/bin/chromedriver`
+Google chrome and the chrome webdriver, which should be located at `/usr/bin/chromedriver`.
 
-pipewire audio system (linux only), specifically access to the command `pw-record`
+pipewire audio system (linux only), specifically access to the command `pw-record`.
 
 # Steps
 1. Set up an instagram account for the bot to use
@@ -34,4 +34,4 @@ id 44, type PipeWire:Interface:Port/3
    `python IHateVoiceNotes.py [link to instagram dm/group chat] [username of instagram account] [password of instagram account] [object serial from step 2]`
 
 # TroubleShooting
-If you send a voice note and the bot does not respond it is likely your object `object.serial` is wrong. try and record an audio source with it using the `pw-record --target [object.serial] [output file]` commmand
+If you send a voice note and the bot does not respond it is likely your object `object.serial` is wrong. try and record an audio source with it using the `pw-record --target [object.serial] [output file]` commmand.
