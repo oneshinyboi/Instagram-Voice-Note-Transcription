@@ -1,7 +1,7 @@
 # Instagram-Voice-Note-Transcription
 
 <img src="/assets/example.png" align="right"/>
-A python script for linux that automatically transcribes any voice note, in an instagram direct message or group chat.
+A python script for linux that automatically transcribes any voice note, in an instagram direct message or group chat, then sends it as a message to that dm/group chat.
 
 If the "/donttldr" message is sent, then the next voice message will be ignored.  <br />
 
