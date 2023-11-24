@@ -16,7 +16,7 @@ pipewire audio system (linux only), specifically access to the command `pw-recor
 
 # Steps
 1. Set up an instagram account for the bot to use
-2. Find your `object.serial` for the audio device you will use with the command `pw-cli list-objects`. For example:
+2. Find your `object.serial` for the audio device you will use with the command `pw-cli list-objects`. It shoudl be a monitor of an audio port, for example:
 ```sh
 id 44, type PipeWire:Interface:Port/3
  		object.serial = "44"
