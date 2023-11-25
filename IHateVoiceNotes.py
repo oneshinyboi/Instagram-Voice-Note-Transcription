@@ -31,8 +31,11 @@ browser.get(sys.argv[1])
 
 browser.implicitly_wait(10)
 
-def SendMessage(message):
+def SendMessage(message, voiceNote):
+    
     action = webdriver.ActionChains(browser)
+    action.move_to_element_with_offset(voiceNote.location, 180, 0)
+    action.click()
     messageBox = browser.find_element(By.XPATH, "//div[contains(text(),'Message...')]")
     action.move_to_element(messageBox)
     action.click()
@@ -95,14 +98,14 @@ while True:
                         voiceNoteTime = int(voiceNoteTime[0])*60 + int(voiceNoteTime[1])
                         audioButton[0].click()
                         os.system("pw-record --target "+str(sys.argv[4])+" $PWD/curr.wav & sleep "+str(voiceNoteTime)+"s ; kill $!")
-                        time.sleep(voiceNoteTime)
+                        time.sleep(1)
                         
                         file=sr.AudioFile(audioFilePath)
                         with file as source:
                             audio = r.record(source)
                         try:
                             s = r.recognize_google(audio)
-                            SendMessage(str(s))
+                            SendMessage(str(s), Messages[-i])
                             print(s)
                         except Exception as e:
                             print(e)
