@@ -1,5 +1,0 @@
-/home/Diamond/Documents/Projects/Instagram-Voice-Note-Transcription/bin/Debug/net7.0/linux-x64/publish/Instagram-Voice-Note-Transcription.pdb
-/home/Diamond/Documents/Projects/Instagram-Voice-Note-Transcription/bin/Debug/net7.0/linux-x64/publish/selenium-manager/linux/selenium-manager
-/home/Diamond/Documents/Projects/Instagram-Voice-Note-Transcription/bin/Debug/net7.0/linux-x64/publish/selenium-manager/macos/selenium-manager
-/home/Diamond/Documents/Projects/Instagram-Voice-Note-Transcription/bin/Debug/net7.0/linux-x64/publish/selenium-manager/windows/selenium-manager.exe
-/home/Diamond/Documents/Projects/Instagram-Voice-Note-Transcription/bin/Debug/net7.0/linux-x64/publish/Instagram-Voice-Note-Transcription
