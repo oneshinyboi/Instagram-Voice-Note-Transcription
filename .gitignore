@@ -1,6 +1,5 @@
 .idea
 .vscode
-.[Dd]ebug
-.[Bb]uild
-.[Oo]bj
+obj
+bin
 GoogleCredentials.json
