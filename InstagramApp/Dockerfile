@@ -5,7 +5,7 @@ WORKDIR /app
 RUN dnf install -y dnf-plugins-core \
     && dnf config-manager --set-enabled google-chrome \
     && dnf install -y google-chrome-stable chromedriver \
-    && dnf clean all \
+    && dnf clean all
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
