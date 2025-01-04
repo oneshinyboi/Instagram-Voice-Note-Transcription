@@ -145,6 +145,7 @@ public class AudioFileHandler
             toReturn = new MessageInfo()
             {
                 Message = combinedMessages,
+                Timestamp = DateTime.Now,
                 Duration = (int)GetWavFileLengthInSeconds(newFilePath)
             };
         }

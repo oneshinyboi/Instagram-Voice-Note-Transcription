@@ -12,16 +12,19 @@ public class InstagramClient : Client
     private readonly ChromeDriver _browser;
     private readonly NetworkManager _manager;
 
-    private DateTime timeStarted;
-    private TimeSpan timeToIgnore = new TimeSpan(0, 0, 3);
+    private DateTime _timeStarted;
+    private readonly TimeSpan _timeToIgnore = new TimeSpan(0, 0, 3);
+    private readonly TimeSpan _refreshInterval = new TimeSpan(4, 1, 39);
 
     private string _lastVNlink = "";
+
+    private Task _currentHandleRequest;
     //private IWebElement _messageWindow;
     //private IJavaScriptEngine _monitor;
 
     public InstagramClient(string filepath, bool logging) : base(filepath, logging)
     {
-        Console.WriteLine(AppContext.BaseDirectory);
+        //Console.WriteLine(AppContext.BaseDirectory);
 
         var opt = new ChromeOptions();
         MessageBuffer = new ConcurrentDictionary<string, string>();
@@ -53,6 +56,7 @@ public class InstagramClient : Client
             "test-type"
         });
         opt.AddAdditionalOption("useAutomationExtension", false);
+        //opt.AddArgument("headless");
         
         _browser = new ChromeDriver(opt);
         _manager = new NetworkManager(_browser);
@@ -68,21 +72,49 @@ public class InstagramClient : Client
         //browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
         //browser.Navigate().GoToUrl("https://www.instagram.com");
         
-        _manager.NetworkRequestSent += (sender, e) => _ = HandleRequest(sender!, e);
-        timeStarted = DateTime.Now;
+        _manager.NetworkRequestSent += (sender, e) =>
+        {
+            _currentHandleRequest = HandleRequest(sender!, e);
+        };
+        _timeStarted = DateTime.Now;
         
         var monitorService = _manager.StartMonitoring();
-        var listenService = Task.Run(() => ListenForText());
+        var listenService = Task.Run(ListenForText);
+        var periodicRefresh = Task.Run(StartPeriodicRefresh);
         
         _browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         
         await monitorService;
         await listenService;
+        await periodicRefresh;
+    }
+    private async Task StartPeriodicRefresh()
+    {
+        while (true)
+        {
+            await Task.Delay(_refreshInterval);
+            Console.WriteLine("its tiiime");
+            if (_currentHandleRequest != null)
+            {
+                await _currentHandleRequest;
+            }
+            try
+            {
+                Console.WriteLine($"Refreshing browser at {DateTime.Now}");
+                _timeStarted = DateTime.MaxValue;
+                await _browser.Navigate().RefreshAsync();
+                _timeStarted = DateTime.Now;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during refresh: {ex.Message}");
+            }
+        }
     }
 
     private async Task HandleRequest(object sender, NetworkRequestSentEventArgs e)
     {
-        if (DateTime.Now - timeStarted < timeToIgnore) return;
+        if (DateTime.Now - _timeStarted < _timeToIgnore) return;
         if (e.RequestUrl.Contains("cdn.fbsbx.com") && e.RequestUrl != _lastVNlink)
         {
             Console.WriteLine("I THIINK ITS A VOICE NOTE");
@@ -92,16 +124,16 @@ public class InstagramClient : Client
             if (DoNextVoiceMessage)
                 try
                 {
-                    var voiceNote = _browser
+                    IWebElement voiceNote = _browser
                         .FindElements(
                             By.XPath("//div[@aria-label='Double tap to like']//div[contains(@style, 'clip-path:')]"))
                         .Last();
                     //identifies voice notes by the wavedform image to avoid StaleElementReference Exception
-                    var uniqueWaveForm = voiceNote.GetAttribute("style");
+                    //var uniqueWaveForm = voiceNote.GetAttribute("style");
 
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
-                    SendMessage(transcribed, uniqueWaveForm);
+                    ReplyToMessage(transcribed, voiceNote);
                 }
                 catch (Exception except)
                 {
@@ -119,7 +151,6 @@ public class InstagramClient : Client
             try
             {
                 // Console.WriteLine(_browser.FindElements(By.XPath("//div[@aria-label='Double tap to like']")));
-                // Console.WriteLine("aaaah");
                 var message = _browser.FindElements(By.XPath("//div[@aria-label='Double tap to like']")).Last()
                     .FindElement(By.XPath(".//div[@dir='auto']"));
                 if (message.Text != lastText)
@@ -156,19 +187,16 @@ public class InstagramClient : Client
         }
     }
 
-    private void SendMessage(MessageInfo message, string uniqueWaveForm)
+    private void ReplyToMessage(MessageInfo message, IWebElement voiceNote)
     {
-        
-        var voiceNote =
-            _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
-
         if (Logging)
         {
-            var parentElement = _browser.FindElement(By.XPath($"//div[@style='{uniqueWaveForm}']/ancestor::div[@aria-label='Double tap to like']"));
+            var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
             var messageParentElement = parentElement.FindElement(By.XPath("../.."));
             message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
             
-            Log(message);
+            Log(message, "Instagram.json");
+            
         };
 
         var messageBox = _browser.FindElement(By.XPath("//div[contains(text(),'Message...')]"));

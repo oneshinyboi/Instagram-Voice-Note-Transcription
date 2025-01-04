@@ -14,19 +14,18 @@ public abstract class Client
         Logging = logging;
     }
 
-    protected void Log(MessageInfo info)
+    protected void Log(MessageInfo info, string filename)
     {
         if (!Logging) return;
         try
         {
-            string timestamp = DateTime.Now.ToString("HH-mm-ss-ffffff");
-            string sanitizedSender = info.Sender.Replace(":", "_").Replace("/", "_");
-            string fileName = $"{timestamp}_{sanitizedSender}.json";
-            string fullPath = Path.Combine(FilePath, fileName);
-
+            string fullPath = Path.Combine(FilePath, filename);
             string json = JsonConvert.SerializeObject(info);
-            Console.WriteLine(json);
-            File.WriteAllText(fullPath, json);
+
+            using (StreamWriter writer = new StreamWriter(fullPath, append: true))
+            {
+                writer.WriteLine(json);
+            }
         }
         catch (Exception ex)
         {
