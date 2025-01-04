@@ -2,13 +2,12 @@ using VoiceNoteTranscription.Clients;
 
 namespace VoiceNoteTranscription;
 
-public class Program
+public class DiscordClientApp
 {
-    private static Client _client;
-
+    private static DiscordClient _client;
     private static async Task Main()
     {
-        _client = new InstagramClient(
+        _client = new DiscordClient(
             "/home/diamond/Projects/Instagram-Voice-Note-Transcription/audio/Instagram", true);
         await _client.Start();
     }
