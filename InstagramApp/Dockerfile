@@ -1,6 +1,11 @@
-﻿FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+﻿FROM fedora:latest AS base
 USER $APP_UID
 WORKDIR /app
+
+RUN dnf install -y dnf-plugins-core \
+    && dnf config-manager --set-enabled google-chrome \
+    && dnf install -y google-chrome-stable chromedriver \
+    && dnf clean all \
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -19,4 +24,6 @@ RUN dotnet publish "InstagramApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+ENV PATH="/usr/bin:$PATH"
 ENTRYPOINT ["dotnet", "InstagramApp.dll"]
