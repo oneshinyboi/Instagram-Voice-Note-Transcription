@@ -16,7 +16,7 @@ jobs:
       - name: Push Docker image
         run: |
           TIMESTAMP=$(date +%s)
-          docker build . --file Dockerfile --tag diamondcoder295/instagram-voice-transcription:$TIMESTAMP
+          docker build . --file InstagramApp/Dockerfile --tag diamondcoder295/instagram-voice-transcription:$TIMESTAMP
           docker tag diamondcoder295/instagram-voice-transcription:$TIMESTAMP diamondcoder295/instagram-voice-transcription:latest
           docker push diamondcoder295/instagram-voice-transcription:$TIMESTAMP
           docker push diamondcoder295/instagram-voice-transcription:latest
