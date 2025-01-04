@@ -4,8 +4,19 @@ RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
     software-properties-common \
-    && rm -rf /var/lib/apt/lists/*
-
+    && rm -rf /var/lib/apt/lists/* \
+    
+# Install dependencies and .NET runtime
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    software-properties-common \
+    && wget https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb \
+    && dpkg -i packages-microsoft-prod.deb \
+    && apt-get update && apt-get install -y \
+    aspnetcore-runtime-8.0 \
+    && rm -rf /var/lib/apt/lists/* \
+    
 # Add Google Chrome repository and install Chrome
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list' \
