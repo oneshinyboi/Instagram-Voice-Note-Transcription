@@ -3,6 +3,8 @@ USER $APP_UID
 WORKDIR /app
 
 RUN dnf install -y dnf-plugins-core \
+    && dnf install fedora-workstation-repositories \
+    && sudo dnf config-manager --set-enabled google-chrome \
     && dnf install -y google-chrome-stable chromedriver \
     && dnf clean all
 
