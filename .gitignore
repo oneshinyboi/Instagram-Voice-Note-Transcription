@@ -4,3 +4,4 @@ obj
 bin
 GoogleCredentials.json
 google-chrome
+env
