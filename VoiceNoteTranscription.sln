@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Backend", "Backend\Backend.csproj", "{0B63AEC9-2079-4698-9AE3-5CB95EA88CC1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InstagramApp", "InstagramApp\InstagramApp.csproj", "{CC1C1E7E-C0AD-43A7-BDA6-068F04BFC210}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiscordApp", "DiscordApp\DiscordApp.csproj", "{36995F55-E059-4386-B51A-C53A6DCE45F9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0B63AEC9-2079-4698-9AE3-5CB95EA88CC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B63AEC9-2079-4698-9AE3-5CB95EA88CC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B63AEC9-2079-4698-9AE3-5CB95EA88CC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B63AEC9-2079-4698-9AE3-5CB95EA88CC1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC1C1E7E-C0AD-43A7-BDA6-068F04BFC210}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC1C1E7E-C0AD-43A7-BDA6-068F04BFC210}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC1C1E7E-C0AD-43A7-BDA6-068F04BFC210}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC1C1E7E-C0AD-43A7-BDA6-068F04BFC210}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36995F55-E059-4386-B51A-C53A6DCE45F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36995F55-E059-4386-B51A-C53A6DCE45F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36995F55-E059-4386-B51A-C53A6DCE45F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36995F55-E059-4386-B51A-C53A6DCE45F9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
