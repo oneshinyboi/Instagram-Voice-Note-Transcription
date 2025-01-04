@@ -58,10 +58,11 @@ public class InstagramClient : Client
 
     public override async Task Start()
     {
+        System.Environment.GetEnvironmentVariable("CHAT_LINK");
         #if RELEASE
-            _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
+            _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK"));
         #else
-            _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
+            _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
         #endif
         
         _manager.NetworkRequestSent += (sender, e) =>
