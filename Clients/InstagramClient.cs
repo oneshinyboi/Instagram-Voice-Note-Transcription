@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Google.Cloud.Speech.V1;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
@@ -10,27 +11,26 @@ public class InstagramClient : Client
     public static ConcurrentDictionary<string, string> MessageBuffer;
     private readonly ChromeDriver _browser;
     private readonly NetworkManager _manager;
-    private readonly ChromeOptions _opt;
 
     private string _lastVNlink = "";
-    private IWebElement _messageWindow;
-    private IJavaScriptEngine _monitor;
+    //private IWebElement _messageWindow;
+    //private IJavaScriptEngine _monitor;
 
-    public InstagramClient(string filepath) : base(filepath)
+    public InstagramClient(string filepath, bool logging) : base(filepath, logging)
     {
         Console.WriteLine(AppContext.BaseDirectory);
 
-        _opt = new ChromeOptions();
+        var opt = new ChromeOptions();
         MessageBuffer = new ConcurrentDictionary<string, string>();
 
         //_opt.AddArgument("disable-extensions");
         //    new { enabled_lab_experiments = new[] { "profile.managed_default_content_settings.images@2" } });
 
-        _opt.AddArgument("user-data-dir=/home/diamond/Projects/Instagram-Voice-Note-Transcription/google-chrome");
-        _opt.AddArgument("profile-directory=Profile 1");
-        _opt.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        opt.AddArgument("user-data-dir=/home/diamond/Projects/Instagram-Voice-Note-Transcription/google-chrome");
+        opt.AddArgument("profile-directory=Profile 1");
+        opt.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
         
-        _opt.AddExcludedArguments(new string[]{
+        opt.AddExcludedArguments(new string[]{
             "enable-automation",
             "enable-logging",
             "use-mock-keychain",
@@ -47,32 +47,33 @@ public class InstagramClient : Client
             "log-level",
             "no-first-run",
             "no-service-autorun",
-            "remote-debugging-port",
             "test-type"
         });
-        _opt.AddAdditionalOption("useAutomationExtension", false);
+        opt.AddAdditionalOption("useAutomationExtension", false);
         
-        _browser = new ChromeDriver(_opt);
+        _browser = new ChromeDriver(opt);
+        _manager = new NetworkManager(_browser);
+        //_monitor = new JavaScriptEngine(_browser);
     }
 
     public override async Task Start()
     {
         //testing
-        //browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
+        _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
 
         //normal
-        _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
+        //browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
         //browser.Navigate().GoToUrl("https://www.instagram.com");
-        Thread.Sleep(1000000);
-        // _manager.NetworkRequestSent += (sender, e) => _ = HandleRequest(sender!, e);
-        //
-        // var monitorService = _manager.StartMonitoring();
-        // var listenService = Task.Run(() => ListenForText());
-        //
-        // _browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-        //
-        // await monitorService;
-        // await listenService;
+        
+        _manager.NetworkRequestSent += (sender, e) => _ = HandleRequest(sender!, e);
+        
+        var monitorService = _manager.StartMonitoring();
+        var listenService = Task.Run(() => ListenForText());
+        
+        _browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+        
+        await monitorService;
+        await listenService;
     }
 
     private async Task HandleRequest(object sender, NetworkRequestSentEventArgs e)
@@ -93,8 +94,9 @@ public class InstagramClient : Client
                     //identifies voice notes by the wavedform image to avoid StaleElementReference Exception
                     var uniqueWaveForm = voiceNote.GetAttribute("style");
 
-                    var transcribed =
-                        await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "Instagram", "aac");
+                    MessageInfo transcribed =
+                        await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
+                    Console.WriteLine($"Hellooo {transcribed.Duration} {transcribed.Message}");
                     SendMessage(transcribed, uniqueWaveForm);
                 }
                 catch (Exception except)
@@ -112,6 +114,8 @@ public class InstagramClient : Client
         {
             try
             {
+                // Console.WriteLine(_browser.FindElements(By.XPath("//div[@aria-label='Double tap to like']")));
+                // Console.WriteLine("aaaah");
                 var message = _browser.FindElements(By.XPath("//div[@aria-label='Double tap to like']")).Last()
                     .FindElement(By.XPath(".//div[@dir='auto']"));
                 if (message.Text != lastText)
@@ -148,10 +152,21 @@ public class InstagramClient : Client
         }
     }
 
-    private void SendMessage(string message, string uniqueWaveForm)
+    private void SendMessage(MessageInfo message, string uniqueWaveForm)
     {
+        
         var voiceNote =
             _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
+
+        if (Logging)
+        {
+            var parentElement = _browser.FindElement(By.XPath($"//div[@style='{uniqueWaveForm}']/ancestor::div[@aria-label='Double tap to like']"));
+            var messageParentElement = parentElement.FindElement(By.XPath("../.."));
+            message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
+            
+            Log(message);
+        };
+
         var messageBox = _browser.FindElement(By.XPath("//div[contains(text(),'Message...')]"));
         new Actions(_browser)
             .MoveToElement(voiceNote)
@@ -159,12 +174,12 @@ public class InstagramClient : Client
             .Click()
             .MoveToElement(messageBox)
             .Click()
-            .SendKeys(message)
+            .SendKeys(message.Message)
             .SendKeys(Keys.Return)
             .Pause(TimeSpan.FromSeconds(1))
             .Perform();
     }
-
+    
     private void SendMessage(string message)
     {
         var messageBox = _browser.FindElement(By.XPath("//div[contains(text(),'Message...')]"));

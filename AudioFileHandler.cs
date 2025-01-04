@@ -5,6 +5,8 @@ using System.Net;
 using CliWrap;
 using CliWrap.Buffered;
 using Google.Cloud.Speech.V1;
+using VoiceNoteTranscription.Clients;
+using NAudio.Wave;
 
 //using OpenQA.Selenium.Interactions;
 
@@ -43,12 +45,17 @@ public class AudioFileHandler
     private static byte[] GetWavHeadder(string filename)
     {
         using var f = File.OpenRead(filename);
-        f.Seek(0, SeekOrigin.Begin);
         var val = new byte[77];
         f.Read(val, 0, 77);
         return val;
     }
-
+    static double GetWavFileLengthInSeconds(string filePath)
+    {
+        using (var reader = new AudioFileReader(filePath))
+        {
+            return reader.TotalTime.TotalSeconds;
+        }
+    }
     private static byte[] GetAllowableLength(string filename, int offset, int length)
     {
         using var f = File.OpenRead(filename);
@@ -72,23 +79,28 @@ public class AudioFileHandler
         writer.Write(data);
     }
 
-    public async Task<string> ProcessDownloadUrl(string url, string clientName, string fileFormat)
+    public async Task<MessageInfo> ProcessDownloadUrl(string url, string fileFormat)
     {
         Console.WriteLine($"attempting to download: {url}");
         var filename = DateTime.Now.ToString("HH:mm:ss:FFFFFF");
-        string fullFilePath;
+        string oldFilePath;
         string newFilePath;
-        using (var client = new WebClient())
+        oldFilePath = $"{_filePath}/{filename}.{fileFormat}";
+        newFilePath = $"{_filePath}/{filename}.wav";
+        using (var client = new HttpClient())
+        using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead))
         {
-            fullFilePath = $"{_filePath}/audios/{clientName}/{filename}.{fileFormat}";
-            newFilePath = $"{_filePath}/audios/{clientName}/{filename}.wav";
+            response.EnsureSuccessStatusCode();
 
-            client.DownloadFile(url, fullFilePath);
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            using (var fileStream = new FileStream(oldFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await stream.CopyToAsync(fileStream);
+            }
         }
-
         await Cli
             .Wrap("ffmpeg")
-            .WithArguments($"-i {fullFilePath} {newFilePath}")
+            .WithArguments($"-i {oldFilePath} {newFilePath} -vn")
             .ExecuteBufferedAsync();
 
         Console.WriteLine("file saved");
@@ -121,15 +133,31 @@ public class AudioFileHandler
 
             Console.WriteLine("deleting files");
             File.Delete(newFilePath.Replace(".wav", "") + $":{i}.wav");
-
             Console.WriteLine("deleted");
             var message = "";
             for (var y = 0; y < response.Results.Count; y++) message += response.Results[y].Alternatives[0].Transcript;
             combinedMessages += message + " ";
         }
+        MessageInfo toReturn;
 
         if (combinedMessages != "")
-            return combinedMessages;
-        return "I made a fucky wucky UwU. I don't understand what you said 🥺";
+        {
+            toReturn = new MessageInfo()
+            {
+                Message = combinedMessages,
+                Duration = (int)GetWavFileLengthInSeconds(newFilePath)
+            };
+        }
+        else
+        {
+            toReturn = new MessageInfo()
+            {
+                Message = "I made a fucky wucky UwU. I don't understand what you said 🥺"
+            }; 
+        }
+        
+        File.Delete(oldFilePath);
+        File.Delete(newFilePath);
+        return toReturn;
     }
 }

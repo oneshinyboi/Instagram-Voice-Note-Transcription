@@ -1,11 +1,12 @@
 using Discord;
 using Discord.WebSocket;
+
 namespace VoiceNoteTranscription.Clients;
 
 public class DiscordClient : Client
 {
     private static DiscordSocketClient _client;	
-    public DiscordClient(string filepath) : base(filepath)
+    public DiscordClient(string filepath, bool logging) : base(filepath, logging)
     {
     }
 
