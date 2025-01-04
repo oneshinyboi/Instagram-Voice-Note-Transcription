@@ -21,16 +21,38 @@ public class InstagramClient : Client
         Console.WriteLine(AppContext.BaseDirectory);
 
         _opt = new ChromeOptions();
-        _browser = new ChromeDriver();
         MessageBuffer = new ConcurrentDictionary<string, string>();
 
-        _opt.AddArgument("disable-extensions");
-        _opt.AddArgument("user-data-dir=/home/Diamond/.config/google-chrome/");
-        _opt.AddLocalStatePreference("browser",
-            new { enabled_lab_experiments = new[] { "profile.managed_default_content_settings.images@2" } });
+        //_opt.AddArgument("disable-extensions");
+        //    new { enabled_lab_experiments = new[] { "profile.managed_default_content_settings.images@2" } });
+
+        _opt.AddArgument("user-data-dir=/home/diamond/Projects/Instagram-Voice-Note-Transcription/google-chrome");
+        _opt.AddArgument("profile-directory=Profile 1");
+        _opt.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
+        
+        _opt.AddExcludedArguments(new string[]{
+            "enable-automation",
+            "enable-logging",
+            "use-mock-keychain",
+            "password-store",
+            "allow-pre-commit-input",
+            "disable-background-networking",
+            "disable-blink-features",
+            "disable-client-side-phishing-detection",
+            "disable-default-apps",
+            "disable-hang-monitor",
+            "disable-popup-blocking",
+            "disable-prompt-on-repost",
+            "disable-sync",
+            "log-level",
+            "no-first-run",
+            "no-service-autorun",
+            "remote-debugging-port",
+            "test-type"
+        });
+        _opt.AddAdditionalOption("useAutomationExtension", false);
+        
         _browser = new ChromeDriver(_opt);
-        _manager = new NetworkManager(_browser);
-        _monitor = new JavaScriptEngine(_browser);
     }
 
     public override async Task Start()
@@ -41,16 +63,16 @@ public class InstagramClient : Client
         //normal
         _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
         //browser.Navigate().GoToUrl("https://www.instagram.com");
-
-        _manager.NetworkRequestSent += (sender, e) => _ = HandleRequest(sender!, e);
-
-        var monitorService = _manager.StartMonitoring();
-        var listenService = Task.Run(() => ListenForText());
-
-        _browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
-
-        await monitorService;
-        await listenService;
+        Thread.Sleep(1000000);
+        // _manager.NetworkRequestSent += (sender, e) => _ = HandleRequest(sender!, e);
+        //
+        // var monitorService = _manager.StartMonitoring();
+        // var listenService = Task.Run(() => ListenForText());
+        //
+        // _browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
+        //
+        // await monitorService;
+        // await listenService;
     }
 
     private async Task HandleRequest(object sender, NetworkRequestSentEventArgs e)

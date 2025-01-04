@@ -8,7 +8,7 @@ public class Program
 
     private static async Task Main()
     {
-        _client = new DiscordClient(
+        _client = new InstagramClient(
             "/home/diamond/Documents/HPserver/linode-migration/Documents/VoiceNoteTranscription");
         await _client.Start();
     }
