@@ -33,5 +33,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
-ENV PATH="/usr/bin:$PATH"
 ENTRYPOINT ["dotnet", "InstagramApp.dll"]
