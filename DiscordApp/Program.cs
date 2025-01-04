@@ -7,7 +7,7 @@ namespace Discord;
 public static class Program
 {
     private static DiscordClient _client = new (
-        System.Environment.GetEnvironmentVariable("DISCORD_PATH")!, true);
+        "storage/Discord", true);
 
     private static async Task Main()
     {

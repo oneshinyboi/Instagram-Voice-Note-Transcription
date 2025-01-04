@@ -18,20 +18,13 @@ public class InstagramClient : Client
     private string _lastVNlink = "";
 
     private Task _currentHandleRequest;
-    //private IWebElement _messageWindow;
-    //private IJavaScriptEngine _monitor;
 
     public InstagramClient(string filepath, bool logging) : base(filepath, logging)
     {
-        //Console.WriteLine(AppContext.BaseDirectory);
-
         var opt = new ChromeOptions();
         MessageBuffer = new ConcurrentDictionary<string, string>();
 
-        //_opt.AddArgument("disable-extensions");
-        //    new { enabled_lab_experiments = new[] { "profile.managed_default_content_settings.images@2" } });
-
-        opt.AddArgument($"user-data-dir={System.Environment.GetEnvironmentVariable("USER_DATA_DIR")}");
+        opt.AddArgument("user-data-dir=google-chrome");
         opt.AddArgument($"profile-directory={System.Environment.GetEnvironmentVariable("PROFILE_NAME")}");
         opt.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
         
@@ -55,21 +48,21 @@ public class InstagramClient : Client
             "test-type"
         });
         opt.AddAdditionalOption("useAutomationExtension", false);
-        //opt.AddArgument("headless");
+        #if RELEASE
+            opt.AddArgument("headless");
+        #endif
         
         _browser = new ChromeDriver(opt);
         _manager = new NetworkManager(_browser);
-        //_monitor = new JavaScriptEngine(_browser);
     }
 
     public override async Task Start()
     {
-        //testing
-        _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
-
-        //normal
-        //browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
-        //browser.Navigate().GoToUrl("https://www.instagram.com");
+        #if RELEASE
+            _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
+        #else
+            _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/259648092797288/");
+        #endif
         
         _manager.NetworkRequestSent += (sender, e) =>
         {
@@ -92,7 +85,6 @@ public class InstagramClient : Client
         while (true)
         {
             await Task.Delay(_refreshInterval);
-            Console.WriteLine("its tiiime");
             if (_currentHandleRequest != null)
             {
                 await _currentHandleRequest;
@@ -116,10 +108,9 @@ public class InstagramClient : Client
         if (DateTime.Now - _timeStarted < _timeToIgnore) return;
         if (e.RequestUrl.Contains("cdn.fbsbx.com") && e.RequestUrl != _lastVNlink)
         {
-            Console.WriteLine("I THIINK ITS A VOICE NOTE");
+            Console.WriteLine($"recived voice note at {e.RequestUrl}");
             _lastVNlink = e.RequestUrl;
 
-            Console.WriteLine("Doing stuff");
             if (DoNextVoiceMessage)
                 try
                 {
@@ -127,8 +118,6 @@ public class InstagramClient : Client
                         .FindElements(
                             By.XPath("//div[@aria-label='Double tap to like']//div[contains(@style, 'clip-path:')]"))
                         .Last();
-                    //identifies voice notes by the wavedform image to avoid StaleElementReference Exception
-                    //var uniqueWaveForm = voiceNote.GetAttribute("style");
 
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
@@ -137,7 +126,7 @@ public class InstagramClient : Client
                 catch (Exception except)
                 {
                     Console.WriteLine(except);
-                    Console.WriteLine("im a failure uwu");
+                    Console.WriteLine("Couldn't process voice note");
                 }
         }
     }
@@ -161,12 +150,12 @@ public class InstagramClient : Client
                 var lowerText = message.Text.ToLower();
                 if (lowerText == "donttldr" || lowerText == "/donttldr")
                 {
-                    Console.WriteLine("Well now I am not doing it :( (voice notes)");
+                    Console.WriteLine("donttldr recieved");
                     DoNextVoiceMessage = false;
                 }
                 else if (lowerText == "dontdonttldr" || lowerText == "/dontdonttldr")
                 {
-                    Console.WriteLine("Im gonna do the next voice note yippee");
+                    Console.WriteLine("dontdonttldr recieved");
                     DoNextVoiceMessage = true;
                 }
                 else if (lowerText.Contains("good bot"))
