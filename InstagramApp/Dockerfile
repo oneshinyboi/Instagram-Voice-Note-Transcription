@@ -7,7 +7,7 @@ RUN dnf install -y dnf-plugins-core \
     && dnf install -y google-chrome-stable chromedriver \
     && dnf clean all
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-stage
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["InstagramApp/InstagramApp.csproj", "InstagramApp/"]
@@ -17,7 +17,7 @@ COPY . .
 WORKDIR "/src/InstagramApp"
 RUN dotnet build "InstagramApp.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-FROM build AS publish
+FROM build-stage AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "InstagramApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
