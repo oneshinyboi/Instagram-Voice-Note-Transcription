@@ -1,12 +1,19 @@
-﻿FROM fedora:latest AS base
-USER $APP_UID
-WORKDIR /app
+﻿FROM ubuntu:latest AS base
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    software-properties-common \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN dnf install -y dnf-plugins-core \
-    && dnf install -y fedora-workstation-repositories \
-    && sudo dnf config-manager --set-enabled google-chrome \
-    && dnf install -y google-chrome-stable chromedriver \
-    && dnf clean all
+# Add Google Chrome repository and install Chrome
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list' \
+    && apt-get update && apt-get install -y google-chrome-stable
+
+# Install Chromium
+RUN apt-get update && apt-get install -y chromium-browser \
+    && rm -rf /var/lib/apt/lists/*
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-stage
 ARG BUILD_CONFIGURATION=Release
