@@ -12,6 +12,9 @@ public class InstagramClient : Client
     private readonly ChromeDriver _browser;
     private readonly NetworkManager _manager;
 
+    private DateTime timeStarted;
+    private TimeSpan timeToIgnore = new TimeSpan(0, 0, 3);
+
     private string _lastVNlink = "";
     //private IWebElement _messageWindow;
     //private IJavaScriptEngine _monitor;
@@ -66,6 +69,7 @@ public class InstagramClient : Client
         //browser.Navigate().GoToUrl("https://www.instagram.com");
         
         _manager.NetworkRequestSent += (sender, e) => _ = HandleRequest(sender!, e);
+        timeStarted = DateTime.Now;
         
         var monitorService = _manager.StartMonitoring();
         var listenService = Task.Run(() => ListenForText());
@@ -78,6 +82,7 @@ public class InstagramClient : Client
 
     private async Task HandleRequest(object sender, NetworkRequestSentEventArgs e)
     {
+        if (DateTime.Now - timeStarted < timeToIgnore) return;
         if (e.RequestUrl.Contains("cdn.fbsbx.com") && e.RequestUrl != _lastVNlink)
         {
             Console.WriteLine("I THIINK ITS A VOICE NOTE");
@@ -96,7 +101,6 @@ public class InstagramClient : Client
 
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
-                    Console.WriteLine($"Hellooo {transcribed.Duration} {transcribed.Message}");
                     SendMessage(transcribed, uniqueWaveForm);
                 }
                 catch (Exception except)
