@@ -2,7 +2,8 @@
 WORKDIR /app
 ARG DEBIAN_FRONTEND=noninteractive
 
-# Install Chrome and Chromium dependencies
+# Install Chrome and chromedriver dependencies
+# Install Google Chrome and ChromeDriver
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -11,7 +12,8 @@ RUN apt-get update && apt-get install -y \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list' \
     && apt-get update && apt-get install -y \
     google-chrome-stable \
-    chromium-browser \
+    && wget -q -O /usr/local/bin/chromedriver https://chromedriver.storage.googleapis.com/$(google-chrome --version | grep -oP '\d+\.\d+\.\d+' | head -n 1)/chromedriver_linux64.zip \
+    && chmod +x /usr/local/bin/chromedriver \
     && rm -rf /var/lib/apt/lists/*
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-stage
