@@ -11,6 +11,13 @@ public static class Program
 
     private static async Task Main()
     {
+        #if RELEASE
+            Console.WriteLine("in release config")
+        #elif DEBUG
+            Console.WriteLine("in debug config");
+        #else
+            Console.WriteLine("in other config")
+        #endif
         await _client.Start();
     }
 }
