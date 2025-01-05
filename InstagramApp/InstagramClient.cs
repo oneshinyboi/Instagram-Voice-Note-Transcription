@@ -24,8 +24,8 @@ public class InstagramClient : Client
         var opt = new ChromeOptions();
         MessageBuffer = new ConcurrentDictionary<string, string>();
 
-        opt.AddArgument("user-data-dir=google-chrome");
-        opt.AddArgument($"profile-directory={System.Environment.GetEnvironmentVariable("PROFILE_NAME")}");
+        //opt.AddArgument("user-data-dir=google-chrome");
+        //opt.AddArgument($"profile-directory={System.Environment.GetEnvironmentVariable("PROFILE_NAME")}");
         opt.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
         
         opt.AddExcludedArguments(new string[]{
@@ -65,6 +65,23 @@ public class InstagramClient : Client
         #else
             _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
         #endif
+        var username = _browser.FindElement(By.Name("username"));
+
+        Thread.Sleep(5000);
+        username.Click();
+        username.SendKeys(System.Environment.GetEnvironmentVariable("USERNAME")); // Assuming args[1] contains the username
+
+        // Find the password field by name
+        var password = _browser.FindElement(By.Name("password"));
+        password.Click();
+        password.SendKeys(System.Environment.GetEnvironmentVariable("PASSWORD"));
+        
+        password.SendKeys(Keys.Enter);
+        
+        Thread.Sleep(7000);
+        var saveInfo = _browser.FindElement(By.XPath("//button[text()='Save info']"));
+        saveInfo.Click();
+        
         
         _manager.NetworkRequestSent += (sender, e) =>
         {
