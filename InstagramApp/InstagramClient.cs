@@ -65,9 +65,9 @@ public class InstagramClient : Client
         #else
             _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
         #endif
-        var username = _browser.FindElement(By.Name("username"));
-
+        
         Thread.Sleep(5000);
+        var username = _browser.FindElement(By.Name("username"));
         username.Click();
         username.SendKeys(System.Environment.GetEnvironmentVariable("USERNAME")); // Assuming args[1] contains the username
 
