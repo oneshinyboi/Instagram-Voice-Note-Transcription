@@ -12,7 +12,7 @@ public class InstagramClient : Client
     private readonly NetworkManager _manager;
 
     private DateTime _timeStarted;
-    private readonly TimeSpan _timeToIgnore = new TimeSpan(0, 0, 3);
+    private readonly TimeSpan _timeToIgnore = new TimeSpan(0, 0, 15);
     private readonly TimeSpan _refreshInterval = new TimeSpan(4, 1, 39);
 
     private string _lastVNlink = "";
