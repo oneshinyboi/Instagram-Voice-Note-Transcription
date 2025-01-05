@@ -50,6 +50,7 @@ public class InstagramClient : Client
         opt.AddAdditionalOption("useAutomationExtension", false);
         #if RELEASE
             opt.AddArgument("headless");
+            opt.AddArgument("remote-debugging-port=9222");
         #endif
         
         _browser = new ChromeDriver(opt);
