@@ -66,21 +66,21 @@ public class InstagramClient : Client
             _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
         #endif
         
-        Thread.Sleep(5000);
-        var username = _browser.FindElement(By.Name("username"));
-        username.Click();
-        username.SendKeys(System.Environment.GetEnvironmentVariable("USERNAME")); // Assuming args[1] contains the username
-
-        // Find the password field by name
-        var password = _browser.FindElement(By.Name("password"));
-        password.Click();
-        password.SendKeys(System.Environment.GetEnvironmentVariable("PASSWORD"));
-        
-        password.SendKeys(Keys.Enter);
-        
-        Thread.Sleep(7000);
-        var saveInfo = _browser.FindElement(By.XPath("//button[text()='Save info']"));
-        saveInfo.Click();
+        // Thread.Sleep(5000);
+        // var username = _browser.FindElement(By.Name("username"));
+        // username.Click();
+        // username.SendKeys(System.Environment.GetEnvironmentVariable("USERNAME")); // Assuming args[1] contains the username
+        //
+        // // Find the password field by name
+        // var password = _browser.FindElement(By.Name("password"));
+        // password.Click();
+        // password.SendKeys(System.Environment.GetEnvironmentVariable("PASSWORD"));
+        //
+        // password.SendKeys(Keys.Enter);
+        //
+        // Thread.Sleep(7000);
+        // var saveInfo = _browser.FindElement(By.XPath("//button[text()='Save info']"));
+        // saveInfo.Click();
         
         
         _manager.NetworkRequestSent += (sender, e) =>
