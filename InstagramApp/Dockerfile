@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get update && apt-get install -y \
     google-chrome-stable \
     unzip \
-    && wget -q -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/$(google-chrome --version)/linux64/chromedriver-linux64.zip \
+    && wget -O /tmp/chromedriver.zip https://storage.googleapis.com/chrome-for-testing-public/$(google-chrome --version | awk '{print $3}')/linux64/chromedriver-linux64.zip \
     && unzip /tmp/chromedriver.zip -d /usr/local/bin/ \
     && chmod +x /usr/local/bin/chromedriver \
     && rm -f /tmp/chromedriver.zip \
