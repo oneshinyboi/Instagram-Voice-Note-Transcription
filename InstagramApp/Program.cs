@@ -12,7 +12,7 @@ public static class Program
     private static async Task Main()
     {
         #if RELEASE
-            Console.WriteLine("in release config")
+            Console.WriteLine("in release config");
         #elif DEBUG
             Console.WriteLine("in debug config");
         #else
