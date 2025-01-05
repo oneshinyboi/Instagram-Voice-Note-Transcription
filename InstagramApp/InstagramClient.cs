@@ -78,6 +78,7 @@ public class InstagramClient : Client
         
         _browser.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
         
+        Console.WriteLine(_browser.Url);
         await monitorService;
         await listenService;
         await periodicRefresh;
