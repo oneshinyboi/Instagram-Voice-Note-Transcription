@@ -19,6 +19,8 @@ RUN apt-get update && apt-get install -y \
     && rm -f /tmp/chromedriver.zip \
     && rm -rf /var/lib/apt/lists/*
 
+USER $APP_UID
+
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-stage
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
