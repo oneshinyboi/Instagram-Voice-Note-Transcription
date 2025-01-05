@@ -138,10 +138,13 @@ public class InstagramClient : Client
                         .FindElements(
                             By.XPath("//div[@aria-label='Double tap to like']//div[contains(@style, 'clip-path:')]"))
                         .Last();
-
+                    
+                    //identifies voice notes by the wavedform image to avoid StaleElementReference Exception
+                    //this is NOT better than passign the IWebElement reference to ReplyToMessage
+                    var uniqueWaveForm = voiceNote.GetAttribute("style");
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
-                    ReplyToMessage(transcribed, voiceNote);
+                    ReplyToMessage(transcribed, uniqueWaveForm);
                 }
                 catch (Exception except)
                 {
@@ -195,8 +198,11 @@ public class InstagramClient : Client
         }
     }
 
-    private void ReplyToMessage(MessageInfo message, IWebElement voiceNote)
+    private void ReplyToMessage(MessageInfo message, string uniqueWaveForm)
     {
+        var voiceNote =
+            _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
+        
         if (Logging)
         {
             var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
