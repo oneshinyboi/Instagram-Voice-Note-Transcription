@@ -37,6 +37,6 @@ RUN dotnet publish "InstagramApp.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-RUN chown -R 1000:1000 /app
+RUN chown -R $APP_UID:1000 /app
 
 ENTRYPOINT ["dotnet", "InstagramApp.dll"]
