@@ -21,7 +21,6 @@ RUN apt-get update && apt-get install -y \
 
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-stage
-USER $APP_UID
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["InstagramApp/InstagramApp.csproj", "InstagramApp/"]
