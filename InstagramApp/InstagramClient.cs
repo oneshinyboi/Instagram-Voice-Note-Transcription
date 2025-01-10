@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Interactions;
+using OpenQA.Selenium.Support.UI;
 
 namespace VoiceNoteTranscription;
 
@@ -63,7 +64,7 @@ public class InstagramClient : Client
         #if RELEASE
             _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK"));
         #else
-            _browser.Navigate().GoToUrl("https://www.instagram.com/direct/t/104910557574628/");
+            _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK_DEBUG"));
         #endif
         
         // Thread.Sleep(5000);
@@ -200,6 +201,7 @@ public class InstagramClient : Client
 
     private void ReplyToMessage(MessageInfo message, string uniqueWaveForm)
     {
+        Console.WriteLine("Attempting to reply to message");
         var voiceNote =
             _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
         
@@ -208,22 +210,18 @@ public class InstagramClient : Client
             var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
             var messageParentElement = parentElement.FindElement(By.XPath("../.."));
             message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
-            
             Log(message, "Instagram.json");
             
         };
-
-        var messageBox = _browser.FindElement(By.XPath("//div[contains(text(),'Message...')]"));
+        
+        //Reveal reply button
         new Actions(_browser)
             .MoveToElement(voiceNote)
-            .MoveByOffset(180, 0)
-            .Click()
-            .MoveToElement(messageBox)
-            .Click()
-            .SendKeys(message.Message)
-            .SendKeys(Keys.Return)
-            .Pause(TimeSpan.FromSeconds(1))
             .Perform();
+        //Find reply button (using _browser.FindElement doesnt work for some reason)
+        IJavaScriptExecutor js = _browser;
+        js.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
+        SendMessage(message.Message);
     }
     
     private void SendMessage(string message)
