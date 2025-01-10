@@ -19,6 +19,7 @@ public class InstagramClient : Client
     private string _lastVNlink = "";
 
     private Task _currentHandleRequest;
+    private SemaphoreSlim _currentReplySemaphoere = new SemaphoreSlim(1);
 
     public InstagramClient(string filepath, bool logging) : base(filepath, logging)
     {
@@ -86,6 +87,7 @@ public class InstagramClient : Client
         
         _manager.NetworkRequestSent += (sender, e) =>
         {
+            //TODO: maybe limit the amount of concurrent Handle Requests
             _currentHandleRequest = HandleRequest(sender!, e);
         };
         _timeStarted = DateTime.Now;
@@ -106,21 +108,13 @@ public class InstagramClient : Client
         while (true)
         {
             await Task.Delay(_refreshInterval);
-            if (_currentHandleRequest != null)
-            {
-                await _currentHandleRequest;
-            }
-            try
-            {
-                Console.WriteLine($"Refreshing browser at {DateTime.Now}");
-                _timeStarted = DateTime.MaxValue;
-                await _browser.Navigate().RefreshAsync();
-                _timeStarted = DateTime.Now;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error during refresh: {ex.Message}");
-            }
+            //TODO: find a way to await all running requests not just the most recent
+            if (_currentHandleRequest != null) await _currentHandleRequest;
+
+            Console.WriteLine($"Refreshing browser at {DateTime.Now}");
+            _timeStarted = DateTime.MaxValue;
+            await _browser.Navigate().RefreshAsync();
+            _timeStarted = DateTime.Now;
         }
     }
 
@@ -145,7 +139,9 @@ public class InstagramClient : Client
                     var uniqueWaveForm = voiceNote.GetAttribute("style");
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
-                    ReplyToMessage(transcribed, uniqueWaveForm);
+                    await _currentReplySemaphoere.WaitAsync();
+                    try { ReplyToMessage(transcribed, uniqueWaveForm); }
+                    finally { _currentReplySemaphoere.Release(); }
                 }
                 catch (Exception except)
                 {
