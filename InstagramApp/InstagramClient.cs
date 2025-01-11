@@ -59,31 +59,38 @@ public class InstagramClient : Client
         _manager = new NetworkManager(_browser);
     }
 
-    public override async Task Start()
+    public void Login(string username, string password)
     {
-        System.Environment.GetEnvironmentVariable("CHAT_LINK");
         #if RELEASE
             _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK"));
         #else
             _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK_DEBUG"));
         #endif
         
-        // Thread.Sleep(5000);
-        // var username = _browser.FindElement(By.Name("username"));
-        // username.Click();
-        // username.SendKeys(System.Environment.GetEnvironmentVariable("USERNAME")); // Assuming args[1] contains the username
-        //
-        // // Find the password field by name
-        // var password = _browser.FindElement(By.Name("password"));
-        // password.Click();
-        // password.SendKeys(System.Environment.GetEnvironmentVariable("PASSWORD"));
-        //
-        // password.SendKeys(Keys.Enter);
-        //
-        // Thread.Sleep(7000);
-        // var saveInfo = _browser.FindElement(By.XPath("//button[text()='Save info']"));
-        // saveInfo.Click();
+        Thread.Sleep(5000);
+        var usernameElement = _browser.FindElement(By.Name("username"));
+        usernameElement.Click();
+        usernameElement.SendKeys(username); // Assuming args[1] contains the username
         
+        // Find the password field by name
+        var passwordElement = _browser.FindElement(By.Name("password"));
+        passwordElement.Click();
+        passwordElement.SendKeys(password);
+        
+        passwordElement.SendKeys(Keys.Enter);
+        
+        Thread.Sleep(7000);
+        var saveInfo = _browser.FindElement(By.XPath("//button[text()='Save info']"));
+        saveInfo.Click();
+        Console.WriteLine("login successfull");
+    }
+    public override async Task Start()
+    {
+        #if RELEASE
+            _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK"));
+        #else
+            _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK_DEBUG"));
+        #endif
         
         _manager.NetworkRequestSent += (sender, e) =>
         {
@@ -201,6 +208,14 @@ public class InstagramClient : Client
         var voiceNote =
             _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
         
+        //Reveal reply button
+        new Actions(_browser)
+            .MoveToElement(voiceNote)
+            .Perform();
+        //Find reply button (using _browser.FindElement doesnt work for some reason)
+        _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
+        SendMessage(message.Message);
+        
         if (Logging)
         {
             var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
@@ -210,13 +225,7 @@ public class InstagramClient : Client
             
         };
         
-        //Reveal reply button
-        new Actions(_browser)
-            .MoveToElement(voiceNote)
-            .Perform();
-        //Find reply button (using _browser.FindElement doesnt work for some reason)
-        _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
-        SendMessage(message.Message);
+        
     }
     
     private void SendMessage(string message)
