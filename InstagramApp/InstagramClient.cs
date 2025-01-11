@@ -57,16 +57,16 @@ public class InstagramClient : Client
         
         _browser = new ChromeDriver(opt);
         _manager = new NetworkManager(_browser);
-    }
-
-    public void Login(string username, string password)
-    {
         #if RELEASE
             _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK"));
         #else
             _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK_DEBUG"));
         #endif
-        
+    }
+
+    public void Login(string username, string password)
+    {
+        Console.WriteLine(_browser.Url);
         Thread.Sleep(5000);
         var usernameElement = _browser.FindElement(By.Name("username"));
         usernameElement.Click();
@@ -85,12 +85,6 @@ public class InstagramClient : Client
     }
     public override async Task Start()
     {
-        #if RELEASE
-            _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK"));
-        #else
-            _browser.Navigate().GoToUrl(System.Environment.GetEnvironmentVariable("CHAT_LINK_DEBUG"));
-        #endif
-        
         _manager.NetworkRequestSent += (sender, e) =>
         {
             //TODO: maybe limit the amount of concurrent Handle Requests
