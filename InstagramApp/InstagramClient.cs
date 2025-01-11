@@ -70,9 +70,8 @@ public class InstagramClient : Client
         Thread.Sleep(5000);
         var usernameElement = _browser.FindElement(By.Name("username"));
         usernameElement.Click();
-        usernameElement.SendKeys(username); // Assuming args[1] contains the username
+        usernameElement.SendKeys(username);
         
-        // Find the password field by name
         var passwordElement = _browser.FindElement(By.Name("password"));
         passwordElement.Click();
         passwordElement.SendKeys(password);

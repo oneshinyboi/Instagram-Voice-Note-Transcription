@@ -8,7 +8,7 @@ public static class Program
 {
     private static InstagramClient _client;
     private static string filepath = "storage/Instagram";
-    private static bool logging;
+    private static bool logging = true;
 
     private static string username ="";
     private static string password;
