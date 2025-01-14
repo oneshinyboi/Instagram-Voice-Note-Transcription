@@ -201,6 +201,14 @@ public class InstagramClient : Client
         var voiceNote =
             _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
         
+        if (Logging)
+        {
+            var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
+            var messageParentElement = parentElement.FindElement(By.XPath("../.."));
+            message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
+            Log(message, "Instagram.json");
+        };
+        
         //Reveal reply button
         new Actions(_browser)
             .MoveToElement(voiceNote)
@@ -208,17 +216,6 @@ public class InstagramClient : Client
         //Find reply button (using _browser.FindElement doesnt work for some reason)
         _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
         SendMessage(message.Message);
-        
-        if (Logging)
-        {
-            var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
-            var messageParentElement = parentElement.FindElement(By.XPath("../.."));
-            message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
-            Log(message, "Instagram.json");
-            
-        };
-        
-        
     }
     
     private void SendMessage(string message)
