@@ -6,15 +6,15 @@ namespace Instagram;
 
 public static class Program
 {
-    private static InstagramClient _client;
-    private static string filepath = "storage/Instagram";
-    private static bool logging = true;
 
-    private static string username ="";
-    private static string password;
 
     private static async Task Main(string[] args)
     {
+        bool logging = true;
+        string username = "";
+        string password = "";
+        string filepath = "storage/Instagram";
+        
         #if RELEASE
             Console.WriteLine("in release config");
         #elif DEBUG
@@ -53,8 +53,8 @@ public static class Program
                 password = args[i+1];
             }
         }
-        _client = new InstagramClient(filepath, logging);
-        if (username != "") _client.Login(username, password);
-        await _client.Start();
+        InstagramClient client = new InstagramClient(filepath, logging);
+        if (username != "") client.Login(username, password);
+        await client.Start();
     }
 }

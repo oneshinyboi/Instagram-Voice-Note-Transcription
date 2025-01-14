@@ -18,7 +18,7 @@ public class InstagramClient : Client
 
     private string _lastVNlink = "";
 
-    private Task _currentHandleRequest;
+    private Task _currentHandleRequest = Task.CompletedTask;
     private SemaphoreSlim _currentReplySemaphoere = new SemaphoreSlim(1);
 
     public InstagramClient(string filepath, bool logging) : base(filepath, logging)
