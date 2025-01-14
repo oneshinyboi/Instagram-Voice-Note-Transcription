@@ -136,11 +136,11 @@ public class InstagramClient : Client
                     
                     //identifies voice notes by the wavedform image to avoid StaleElementReference Exception
                     //this is NOT better than passign the IWebElement reference to ReplyToMessage
-                    var uniqueWaveForm = voiceNote.GetAttribute("style");
+                    string voiceNoteLength = voiceNote.FindElement(By.XPath(".//div[@aria-label='Audio scrubber']")).GetDomAttribute("aria-valuemax");
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
                     await _currentReplySemaphoere.WaitAsync();
-                    try { ReplyToMessage(transcribed, uniqueWaveForm); }
+                    try { ReplyToMessage(transcribed, voiceNoteLength); }
                     finally { _currentReplySemaphoere.Release(); }
                 }
                 catch (Exception except)
@@ -195,27 +195,29 @@ public class InstagramClient : Client
         }
     }
 
-    private void ReplyToMessage(MessageInfo message, string uniqueWaveForm)
+    private void ReplyToMessage(MessageInfo message, string voiceNoteLength)
     {
-        Console.WriteLine("Attempting to reply to message");
-        var voiceNote =
-            _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@style='{uniqueWaveForm}']"));
-        
-        if (Logging)
-        {
-            var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
-            var messageParentElement = parentElement.FindElement(By.XPath("../.."));
-            message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
-            Log(message, "Instagram.json");
-        };
-        
-        //Reveal reply button
-        new Actions(_browser)
-            .MoveToElement(voiceNote)
-            .Perform();
-        //Try to find reply button (using _browser.FindElement doesnt work for some reason)
         try
         {
+            Console.WriteLine("Attempting to reply to message");
+            var voiceNote =
+                _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@aria-valuemax='{voiceNoteLength}']"));
+            var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
+
+            
+            if (Logging)
+            {
+                var messageParentElement = parentElement.FindElement(By.XPath("../.."));
+                message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
+                Log(message, "Instagram.json");
+            };
+            
+            //Reveal reply button
+            new Actions(_browser)
+                .MoveToElement(parentElement)
+                .Perform();
+            //Try to find reply button (using _browser.FindElement doesnt work for some reason)
+            
             _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
         }
         catch (Exception e)
