@@ -8,7 +8,7 @@ namespace VoiceNoteTranscription;
 
 public class InstagramClient : Client
 {
-    public static ConcurrentDictionary<string, string> MessageBuffer = new ConcurrentDictionary<string, string>();
+    public static ConcurrentDictionary<string, string> MessageBuffer;
     private readonly ChromeDriver _browser;
     private readonly NetworkManager _manager;
 
@@ -24,6 +24,8 @@ public class InstagramClient : Client
     public InstagramClient(string filepath, bool logging) : base(filepath, logging)
     {
         var opt = new ChromeOptions();
+        MessageBuffer = new ConcurrentDictionary<string, string>();
+
         opt.AddArgument("user-data-dir=google-chrome");
         opt.AddArgument($"profile-directory={System.Environment.GetEnvironmentVariable("PROFILE_NAME")}");
         opt.AddArgument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36");
