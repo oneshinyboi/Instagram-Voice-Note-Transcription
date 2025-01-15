@@ -201,7 +201,7 @@ public class InstagramClient : Client
         {
             Console.WriteLine("Attempting to reply to message");
             var voiceNote =
-                _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@aria-valuemax='{voiceNoteLength}']/parent::div"));
+                _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@aria-valuemax='{voiceNoteLength}']"));
             
             if (Logging)
             {
