@@ -202,10 +202,11 @@ public class InstagramClient : Client
             Console.WriteLine("Attempting to reply to message");
             var voiceNote =
                 _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@aria-valuemax='{voiceNoteLength}']"));
+            var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
+
             
             if (Logging)
             {
-                var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
                 var messageParentElement = parentElement.FindElement(By.XPath("../.."));
                 message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
                 Log(message, "Instagram.json");
@@ -213,7 +214,7 @@ public class InstagramClient : Client
             
             //Reveal reply button
             new Actions(_browser)
-                .MoveToElement(voiceNote)
+                .MoveToElement(parentElement)
                 .Perform();
             //Try to find reply button (using _browser.FindElement doesnt work for some reason)
             
