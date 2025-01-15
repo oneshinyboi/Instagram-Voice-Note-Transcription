@@ -207,22 +207,22 @@ public class InstagramClient : Client
                 var messageParentElement = parentElement.FindElement(By.XPath("../.."));
                 message.Sender = messageParentElement.FindElement(By.XPath(".//a[@role='link']")).GetDomAttribute("href").TrimStart('/');
                 Log(message, "Instagram.json");
-            }
+            };
             
             //Reveal reply button
             new Actions(_browser)
                 .MoveToElement(voiceNote)
                 .Perform();
             //Try to find reply button (using _browser.FindElement doesnt work for some reason)
+            
             IJavaScriptExecutor js = _browser;
             js.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
-            SendMessage(message.Message);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            SendMessage(message.Message);
         }
+        SendMessage(message.Message);
     }
     
     private void SendMessage(string message)
