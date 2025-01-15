@@ -214,15 +214,14 @@ public class InstagramClient : Client
                 .MoveToElement(voiceNote)
                 .Perform();
             //Try to find reply button (using _browser.FindElement doesnt work for some reason)
-            IJavaScriptExecutor js = _browser;
-            js.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
-            SendMessage(message.Message);
+            
+            _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            SendMessage(message.Message);
         }
+        SendMessage(message.Message);
     }
     
     private void SendMessage(string message)
