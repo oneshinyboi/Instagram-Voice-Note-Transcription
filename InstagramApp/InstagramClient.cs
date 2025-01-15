@@ -215,8 +215,7 @@ public class InstagramClient : Client
                 .Perform();
             //Try to find reply button (using _browser.FindElement doesnt work for some reason)
             
-            IJavaScriptExecutor js = _browser;
-            js.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
+            _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
         }
         catch (Exception e)
         {
