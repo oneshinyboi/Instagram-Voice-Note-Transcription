@@ -1,6 +1,8 @@
 using System.Collections.Concurrent;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.DevTools.V85.IndexedDB;
+using OpenQA.Selenium.DevTools.V85.Performance;
 using OpenQA.Selenium.Interactions;
 using OpenQA.Selenium.Support.UI;
 
@@ -121,6 +123,7 @@ public class InstagramClient : Client
         if (DateTime.Now - _timeStarted < _timeToIgnore) return;
         if (e.RequestUrl.Contains("cdn.fbsbx.com") && e.RequestUrl != _lastVNlink)
         {
+            await _currentReplySemaphoere.WaitAsync();
             Console.WriteLine($"recived voice note at {e.RequestUrl}");
             _lastVNlink = e.RequestUrl;
 
@@ -137,8 +140,8 @@ public class InstagramClient : Client
                     string voiceNoteLength = voiceNote.FindElement(By.XPath(".//div[@aria-label='Audio scrubber']")).GetDomAttribute("aria-valuemax");
                     MessageInfo transcribed =
                         await new AudioFileHandler(FilePath).ProcessDownloadUrl(e.RequestUrl, "mp4");
-                    await _currentReplySemaphoere.WaitAsync();
                     try { ReplyToMessage(transcribed, voiceNoteLength); }
+                    catch (Exception ex) {Console.WriteLine(ex);}
                     finally { _currentReplySemaphoere.Release(); }
                 }
                 catch (Exception except)
@@ -200,7 +203,6 @@ public class InstagramClient : Client
             Console.WriteLine("Attempting to reply to message");
             var voiceNote =
                 _browser.FindElement(By.XPath($"//div[@aria-label='Double tap to like']//div[@aria-valuemax='{voiceNoteLength}']/parent::div"));
-            
             if (Logging)
             {
                 var parentElement = voiceNote.FindElement(By.XPath("ancestor::div[@aria-label='Double tap to like']"));
@@ -212,16 +214,39 @@ public class InstagramClient : Client
             //Reveal reply button
             new Actions(_browser)
                 .MoveToElement(voiceNote)
+                .Click()
+                .SendKeys(Keys.Tab+Keys.Tab+Keys.Enter)
                 .Perform();
-            //Try to find reply button (using _browser.FindElement doesnt work for some reason)
             
-            _browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
+            int count = 0;
+            while (true)
+            {
+                IWebElement focusedElement = _browser.SwitchTo().ActiveElement();
+                if (focusedElement.GetAttribute("aria-label") == "Reply")
+                {
+                    focusedElement.Click();
+                    new Actions(_browser).SendKeys(message.Message + Keys.Enter).Perform();
+                    break;
+                }
+                new Actions(_browser).SendKeys(Keys.Tab).Perform();
+
+                if (count > 10)
+                {
+                    throw new Exception("could not find reply button within 10 tab presses");
+                }
+                count++;
+            }
+            
+            
+            //Try to find reply button (using _browser.FindElement doesnt work for some reason)
+            //_browser.ExecuteScript("document.querySelector('svg[aria-label=\"Reply\"]').parentElement.click();");
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
+            SendMessage(message.Message);
         }
-        SendMessage(message.Message);
+        Console.WriteLine("sent message");
     }
     
     private void SendMessage(string message)
